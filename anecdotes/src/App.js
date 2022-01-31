@@ -34,6 +34,13 @@ const App = () => {
     setVotes(votesCopy);
   };
 
+  const objArray = [];
+  for (var index in votes) {
+    objArray.push([index, votes[index]]);
+  }
+
+  const highestRated = objArray.sort((a, b) => a[1] - b[1])[objArray.length - 1];
+
   return (
     <div>
       <h1>Anecdote of the Day</h1>
@@ -43,6 +50,7 @@ const App = () => {
         <Button onClick={anecdoteHandler} label="next anecdote" />
       </div>
       <h1>Most highly rated anecdote</h1>
+      {anecdotes[highestRated[0]]} has {votes[highestRated[0]]} votes.
     </div>
   );
 };
