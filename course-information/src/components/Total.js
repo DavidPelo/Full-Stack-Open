@@ -1,10 +1,13 @@
-import React from 'react';
+import React from "react";
 
-function Total(props) {
-  let total = 0;
-  props.parts.forEach(part => total += part.exercises);
+function Total({ parts }) {
+  const total = parts
+    .map((part) => part.exercises)
+    .reduce((runningTotal, num) => runningTotal + num, 0);
   return (
-    <p>Number of exercises {total}</p>
+    <p>
+      <b>total of {total} exercises</b>
+    </p>
   );
 }
 

@@ -1,7 +1,7 @@
-function Part(props) {
+function Part({ title, noOfExercises }) {
   return (
     <p>
-      {props.title} {props.noOfExercises}
+      {title} {noOfExercises}
     </p>
   );
 }
