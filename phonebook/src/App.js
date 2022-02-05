@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SearchBar from "./components/SearchBar";
 import ContactList from "./components/ContactList";
 import AddForm from "./components/AddForm";
+import axios from 'axios';
 
 const App = () => {
   const [persons, setPersons] = useState([
@@ -11,6 +12,15 @@ const App = () => {
     { name: "Mary Poppendieck", number: "39-23-6423122", id: 4 },
     { name: "David Pelo", number: "39-89-6423122", id: 5 },
   ]);
+
+  useEffect(() => {
+    console.log('effect')
+    axios
+      .get('http://localhost:3002/persons')
+      .then(response => {
+        console.log('promise fulfilled')
+      })
+  }, [])
 
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
