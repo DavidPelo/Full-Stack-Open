@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import SearchBar from "./components/SearchBar";
 import ContactList from "./components/ContactList";
 import AddForm from "./components/AddForm";
-import axios from "axios";
+import numberService from "./services/numbers";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -11,8 +11,8 @@ const App = () => {
   const [searchBy, setSearchBy] = useState("");
 
   const getPersons = () => {
-    axios.get("http://localhost:3002/persons").then((response) => {
-      setPersons(response.data);
+    numberService.getAll().then((initialNumbers) => {
+      setPersons(initialNumbers);
     });
   };
   useEffect(getPersons, []);
@@ -31,46 +31,58 @@ const App = () => {
 
   const addNewNameHandler = (e) => {
     e.preventDefault();
-    if (persons.find((person) => person.name === newName)) {
-      alert(`${newName} already exists in the phonebook`);
+
+    if (newNumber.trim() === "") {
+      alert(`Please enter a number to be added to the phonebook`);
       return;
-    } else if (newName.trim() === "") {
-      alert(`Please enter a name to be added to the phonebook`);
+    } else if (persons.find((person) => person.number === newNumber)) {
+      alert(`${newNumber} already exists in the phonebook`);
       return;
     }
 
-    if (persons.find((person) => person.number === newNumber)) {
-      alert(`${newNumber} already exists in the phonebook`);
+    const existingPerson = persons.find((person) => person.name === newName)
+
+    if (newName.trim() === "") {
+      alert(`Please enter a name to be added to the phonebook`);
       return;
-    } else if (newNumber.trim() === "") {
-      alert(`Please enter a number to be added to the phonebook`);
+    } else if (existingPerson) {
+      if(window.confirm(`${newName} already exists in the phonebook. Replace the old number with a new one?`)) {
+        let updateContactObject = {
+          name: existingPerson.name,
+          number: newNumber,
+        };
+        numberService.update(existingPerson.id, updateContactObject).then((updatedContact) => {
+          const filteredPersons = persons.filter(p => p.id !== existingPerson.id)
+          const updatedPersons = [...filteredPersons, updatedContact].sort((a, b) => (a.id > b.id ? 1 : -1));
+          setPersons(updatedPersons);
+          setNewName("");
+          setNewNumber("");
+        });
+      }
       return;
     }
 
     let newNameObject = {
       name: newName,
       number: newNumber,
-      id: persons.length + 1,
     };
 
-    setPersons(persons.concat(newNameObject));
-    setNewName("");
-    setNewNumber("");
+    numberService.create(newNameObject).then((newNumber) => {
+      setPersons([...persons, newNumber]);
+      setNewName("");
+      setNewNumber("");
+    });
   };
 
+  const deleteContactHandler = (id) => {
+    numberService.remove(id).then(deletedContact => {
+      setPersons(persons.filter(p => p.id !== id));
+    });
+  }
+
   const contacts = !searchBy
-    ? persons.map((person) => (
-        <p key={person.id}>
-          {person.name} {person.number}
-        </p>
-      ))
-    : persons
-        .filter((person) => person.name.indexOf(searchBy) > -1)
-        .map((person) => (
-          <p key={person.id}>
-            {person.name} {person.number}
-          </p>
-        ));
+    ? persons
+    : persons.filter((person) => person.name.indexOf(searchBy) > -1);
 
   return (
     <div>
@@ -85,7 +97,7 @@ const App = () => {
         onSubmit={addNewNameHandler}
       />
       <h2>Numbers</h2>
-      <ContactList contacts={contacts} />
+      <ContactList contacts={contacts} onDeleteContact={deleteContactHandler}/>
     </div>
   );
 };
