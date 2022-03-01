@@ -7,7 +7,7 @@ import Footer from "./components/Footer";
 const App = () => {
   const [notes, setNotes] = useState([]);
   const [newNote, setNewNote] = useState("");
-  const [showAll, setShowAll] = useState(false);
+  const [showAll, setShowAll] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
@@ -15,7 +15,6 @@ const App = () => {
       setNotes(initialNotes);
     });
   }, []);
-  console.log("render", notes.length, "notes");
 
   const addNote = (event) => {
     event.preventDefault();
@@ -23,16 +22,16 @@ const App = () => {
       content: newNote,
       date: new Date().toISOString(),
       important: Math.random() > 0.5,
+      id: notes.length + 1,
     };
 
-    noteService.create(noteObject).then((newNote) => {
-      setNotes(notes.concat(newNote));
+    noteService.create(noteObject).then((returnedNote) => {
+      setNotes(notes.concat(returnedNote));
       setNewNote("");
     });
   };
 
   const handleNoteChange = (event) => {
-    console.log(event.target.value);
     setNewNote(event.target.value);
   };
 
@@ -42,17 +41,16 @@ const App = () => {
 
     noteService
       .update(id, changedNote)
-      .then((updatedNote) => {
-        setNotes(notes.map((note) => (note.id !== id ? note : updatedNote)));
+      .then((returnedNote) => {
+        setNotes(notes.map((note) => (note.id !== id ? note : returnedNote)));
       })
-      .catch(error => {
+      .catch((error) => {
         setErrorMessage(
-          `the note '${note.content}' was already deleted from server`
+          `Note '${note.content}' was already removed from server`
         );
         setTimeout(() => {
           setErrorMessage(null);
         }, 5000);
-
         setNotes(notes.filter((n) => n.id !== id));
       });
   };
