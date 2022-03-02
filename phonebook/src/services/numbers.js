@@ -1,5 +1,5 @@
 import axios from "axios";
-const baseUrl = "http://localhost:3002/persons";
+const baseUrl = "/api/people";
 
 const getAll = () => {
   const request = axios.get(baseUrl)
@@ -21,8 +21,8 @@ const remove = (id) => {
   return request.then((response) => response.data);
 };
 
-const module = { getAll, create, update, remove };
+const services = { getAll, create, update, remove };
 
-export default module;
+export default services;
 
 
